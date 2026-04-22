@@ -175,7 +175,7 @@ onAuthStateChanged(auth, async (user) => {
             window.location.href = "index.html";
         }
     } else {
-        alert("Please login first.");
-        window.location.href = "login.html";
+        alert("Please login as administrator.");
+        window.location.href = "admin-login.html";
     }
 });
