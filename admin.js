@@ -1,5 +1,6 @@
-import { db } from "./firebase-config.js";
-import { ref, onValue, set, push, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { db, auth } from "./firebase-config.js";
+import { ref, onValue, set, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // DOM Elements
 const adminProductList = document.getElementById('admin-product-list');
@@ -160,4 +161,21 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 // Init
-initListeners();
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        // Check if user is in the admins node
+        const adminRef = ref(db, 'admins/' + user.uid);
+        const snapshot = await get(adminRef);
+        
+        if (snapshot.exists() && snapshot.val() === true) {
+            console.log("Admin verified");
+            initListeners();
+        } else {
+            alert("Access Denied: You do not have admin privileges.");
+            window.location.href = "index.html";
+        }
+    } else {
+        alert("Please login first.");
+        window.location.href = "login.html";
+    }
+});
