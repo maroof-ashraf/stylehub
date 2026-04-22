@@ -2,7 +2,8 @@ import { auth, db, googleProvider } from "./firebase-config.js";
 import { 
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword, 
-    signInWithPopup, 
+    signInWithRedirect, 
+    getRedirectResult,
     updateProfile 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -11,6 +12,48 @@ import { ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.8.0
 const loginForm = document.getElementById('login-form');
 const signupForm = document.getElementById('signup-form');
 const googleBtn = document.getElementById('google-login');
+
+// Check for redirect result on page load
+getRedirectResult(auth)
+    .then((result) => {
+        if (result) {
+            handleUserAuth(result.user);
+        }
+    })
+    .catch((error) => {
+        console.error("Redirect Auth Error:", error);
+        alert("Auth Error: " + error.message);
+    });
+
+async function handleUserAuth(user) {
+    try {
+        // Check if user exists in RTDB
+        const userRef = ref(db, 'users/' + user.uid);
+        const snapshot = await get(userRef);
+
+        if (!snapshot.exists()) {
+            // New user
+            await set(userRef, {
+                username: user.displayName,
+                email: user.email,
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString(),
+                photoURL: user.photoURL
+            });
+        } else {
+            // Existing user - update last login
+            await update(userRef, {
+                lastLogin: new Date().toISOString()
+            });
+        }
+
+        alert("Logged in successfully!");
+        window.location.href = "index.html";
+    } catch (error) {
+        console.error("Error handling user data:", error);
+        alert("Error syncing user data: " + error.message);
+    }
+}
 
 // Handle Email Login
 if (loginForm) {
@@ -21,15 +64,7 @@ if (loginForm) {
 
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            console.log("Logged in:", userCredential.user);
-            
-            // Update last login in RTDB
-            await update(ref(db, 'users/' + userCredential.user.uid), {
-                lastLogin: new Date().toISOString()
-            });
-
-            alert("Login successful!");
-            window.location.href = "index.html";
+            handleUserAuth(userCredential.user);
         } catch (error) {
             console.error(error);
             alert("Error: " + error.message);
@@ -48,20 +83,8 @@ if (signupForm) {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-
-            // Set display name
             await updateProfile(user, { displayName: name });
-
-            // Store user in RTDB
-            await set(ref(db, 'users/' + user.uid), {
-                username: name,
-                email: email,
-                createdAt: new Date().toISOString(),
-                lastLogin: new Date().toISOString()
-            });
-
-            alert("Account created successfully!");
-            window.location.href = "index.html";
+            handleUserAuth(user);
         } catch (error) {
             console.error(error);
             alert("Error: " + error.message);
@@ -73,31 +96,7 @@ if (signupForm) {
 if (googleBtn) {
     googleBtn.addEventListener('click', async () => {
         try {
-            const result = await signInWithPopup(auth, googleProvider);
-            const user = result.user;
-
-            // Check if user exists in RTDB
-            const userRef = ref(db, 'users/' + user.uid);
-            const snapshot = await get(userRef);
-
-            if (!snapshot.exists()) {
-                // New user via Google
-                await set(userRef, {
-                    username: user.displayName,
-                    email: user.email,
-                    createdAt: new Date().toISOString(),
-                    lastLogin: new Date().toISOString(),
-                    photoURL: user.photoURL
-                });
-            } else {
-                // Existing user - update last login
-                await update(userRef, {
-                    lastLogin: new Date().toISOString()
-                });
-            }
-
-            alert("Logged in with Google!");
-            window.location.href = "index.html";
+            await signInWithRedirect(auth, googleProvider);
         } catch (error) {
             console.error(error);
             alert("Google Auth Error: " + error.message);

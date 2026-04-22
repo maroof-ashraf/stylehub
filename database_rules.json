@@ -5,18 +5,19 @@
       ".write": "auth != null && (auth.uid === 'mJrjXJbt2DfLzzKZt1clJYh12M92' || root.child('admins').child(auth.uid).exists())"
     },
     "orders": {
-      ".read": "auth != null",
-      ".write": "auth != null",
       "$order_id": {
-         ".read": "auth != null && (data.child('userId').val() === auth.uid || auth.uid === 'mJrjXJbt2DfLzzKZt1clJYh12M92' || root.child('admins').child(auth.uid).exists())"
-      }
+         ".read": "auth != null && (data.child('userId').val() === auth.uid || auth.uid === 'mJrjXJbt2DfLzzKZt1clJYh12M92' || root.child('admins').child(auth.uid).exists())",
+         ".write": "auth != null"
+      },
+      ".read": "auth != null && (auth.uid === 'mJrjXJbt2DfLzzKZt1clJYh12M92' || root.child('admins').child(auth.uid).exists())",
+      ".write": "auth != null"
     },
     "users": {
-      ".read": "auth != null && (auth.uid === 'mJrjXJbt2DfLzzKZt1clJYh12M92' || root.child('admins').child(auth.uid).exists())",
       "$uid": {
         ".read": "auth != null && ($uid === auth.uid || auth.uid === 'mJrjXJbt2DfLzzKZt1clJYh12M92' || root.child('admins').child(auth.uid).exists())",
         ".write": "auth != null && ($uid === auth.uid || auth.uid === 'mJrjXJbt2DfLzzKZt1clJYh12M92' || root.child('admins').child(auth.uid).exists())"
-      }
+      },
+      ".read": "auth != null && (auth.uid === 'mJrjXJbt2DfLzzKZt1clJYh12M92' || root.child('admins').child(auth.uid).exists())"
     },
     "admins": {
       ".read": "auth != null",
