@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | StyleHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header class="admin-header">
+        <div class="logo">StyleHub Admin</div>
+        <nav>
+            <a href="index.html">View Site</a>
+        </nav>
+    </header>
+
+    <main class="admin-container">
+        <aside class="sidebar">
+            <ul class="nav-links">
+                <li><a href="#" class="nav-btn" data-target="dashboard">Dashboard</a></li>
+                <li><a href="#" class="nav-btn active" data-target="products">Products</a></li>
+                <li><a href="#" class="nav-btn" data-target="orders">Orders</a></li>
+                <li><a href="#" class="nav-btn" data-target="users">Users</a></li>
+            </ul>
+        </aside>
+
+        <section class="content">
+            <div id="products-view" class="view-section">
+                <h2>Product Management</h2>
+
+                <!-- Add Product Form -->
+                <div class="card form-card">
+                    <h3>Add New Product</h3>
+                    <form id="add-product-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="product-name">Product Name</label>
+                                <input type="text" id="product-name" required placeholder="e.g., Slim Fit Jeans">
+                            </div>
+                            <div class="form-group">
+                                <label for="product-price">Price (₹)</label>
+                                <input type="number" id="product-price" required min="0" step="0.01" placeholder="e.g., 49.99">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="product-image">Image URL</label>
+                                <input type="text" id="product-image" required placeholder="e.g., images/jeans.png">
+                            </div>
+                            <div class="form-group">
+                                <label for="product-category">Category</label>
+                                <select id="product-category" required>
+                                    <option value="men">Men's Wear</option>
+                                    <option value="women">Women's Wear</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn primary-btn">Add Product</button>
+                    </form>
+                </div>
+
+                <!-- Products Table -->
+                <div class="card table-card">
+                    <h3>Current Products</h3>
+                    <table id="products-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-product-list">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="orders-view" class="view-section" style="display: none;">
+                <h2>Orders Management</h2>
+                <div class="card table-card">
+                    <h3>Recent Orders</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-order-list">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="dashboard-view" class="view-section" style="display: none;">
+                <h2>Dashboard</h2>
+                <div class="card">
+                    <p style="font-size: 1.1rem; color: #334155;">Welcome to the StyleHub Admin Panel.</p>
+                    <div style="display: flex; gap: 2rem; margin-top: 2rem;">
+                        <div style="background: #eff6ff; padding: 1.5rem; border-radius: 8px; flex: 1; border: 1px solid #bfdbfe;">
+                            <h4 style="color: #1e3a8a; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Total Users</h4>
+                            <p id="stat-users" style="font-size: 2.5rem; font-weight: 700; color: #1d4ed8; margin-top: 0.5rem;">0</p>
+                        </div>
+                        <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 8px; flex: 1; border: 1px solid #bbf7d0;">
+                            <h4 style="color: #14532d; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Total Orders</h4>
+                            <p id="stat-orders" style="font-size: 2.5rem; font-weight: 700; color: #15803d; margin-top: 0.5rem;">0</p>
+                        </div>
+                        <div style="background: #fef2f2; padding: 1.5rem; border-radius: 8px; flex: 1; border: 1px solid #fecaca;">
+                            <h4 style="color: #7f1d1d; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Total Products</h4>
+                            <p id="stat-products" style="font-size: 2.5rem; font-weight: 700; color: #b91c1c; margin-top: 0.5rem;">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="users-view" class="view-section" style="display: none;">
+                <h2>Users Management</h2>
+                <div class="card table-card">
+                    <h3>Registered Users</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Account Created</th>
+                                <th>Last Login</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-user-list">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>

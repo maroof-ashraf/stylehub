@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | StyleHub</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .orders-container {
+            max-width: 1000px;
+            margin: 120px auto 60px;
+            padding: 0 20px;
+        }
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .order-id { font-weight: 700; color: #1e293b; }
+        .order-date { color: #64748b; font-size: 0.9rem; }
+        .order-items { margin-bottom: 12px; color: #475569; }
+        .order-total { font-weight: 700; color: #4f46e5; font-size: 1.1rem; }
+        .empty-orders { text-align: center; padding: 60px 0; color: #64748b; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">StyleHub</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="index.html#mens-wear">Men's</a>
+            <a href="index.html#womens-wear">Women's</a>
+            <a href="my-orders.html" class="active">My Orders</a>
+            <a href="login.html" id="login-toggle">Login</a>
+        </nav>
+    </header>
+
+    <main class="orders-container">
+        <h1>My Order History</h1>
+        <div id="orders-list">
+            <p class="empty-orders">Loading your orders...</p>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, db } from "./firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { ref, query, orderByChild, equalTo, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const ordersList = document.getElementById('orders-list');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Fetch orders for this user
+                const ordersRef = ref(db, 'orders');
+                onValue(ordersRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const allOrders = Object.values(data);
+                        const myOrders = allOrders.filter(o => o.userId === user.uid).reverse();
+                        
+                        if (myOrders.length === 0) {
+                            ordersList.innerHTML = '<p class="empty-orders">You haven\'t placed any orders yet.</p>';
+                        } else {
+                            ordersList.innerHTML = '';
+                            myOrders.forEach(order => {
+                                const card = document.createElement('div');
+                                card.className = 'order-card';
+                                card.innerHTML = `
+                                    <div class="order-header">
+                                        <span class="order-id">Order #${order.id}</span>
+                                        <span class="order-date">${order.date}</span>
+                                    </div>
+                                    <div class="order-items">
+                                        <strong>Items:</strong> ${order.items}
+                                    </div>
+                                    <div class="order-total">
+                                        Total: ₹${order.total.toFixed(2)}
+                                    </div>
+                                `;
+                                ordersList.appendChild(card);
+                            });
+                        }
+                    } else {
+                        ordersList.innerHTML = '<p class="empty-orders">You haven\'t placed any orders yet.</p>';
+                    }
+                });
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+    <script type="module" src="auth-status.js"></script>
+</body>
+</html>
