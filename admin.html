@@ -44,14 +44,25 @@
         .primary-btn { background: #4f46e5; color: white; margin-top: 1rem; }
         .btn-google { background: #1e293b; color: white; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1rem; }
         .btn-google img { width: 20px; }
-        .divider { display: flex; align-items: center; margin: 1.5rem 0; color: #475569; }
-        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #334155; }
         .divider span { padding: 0 10px; font-size: 0.875rem; }
 
+        /* Force hide dashboard by default */
+        #main-admin-header, #main-admin-container {
+            display: none !important;
+        }
+
+        body.admin-authorized #main-admin-header, 
+        body.admin-authorized #main-admin-container {
+            display: flex !important;
+        }
+        
+        body.admin-authorized #admin-login-section {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <header class="admin-header" id="main-admin-header" style="display: none;">
+    <header class="admin-header" id="main-admin-header">
         <div class="logo">StyleHub Admin</div>
         <nav>
             <a href="index.html">View Site</a>
@@ -94,7 +105,7 @@
         </div>
     </div>
 
-    <main class="admin-container" id="main-admin-container" style="display: none;">
+    <main class="admin-container" id="main-admin-container">
         <aside class="sidebar">
             <ul class="nav-links">
                 <li><a href="#" class="nav-btn" data-target="dashboard">Dashboard</a></li>

@@ -68,15 +68,11 @@ async function verifyAdmin(user) {
 }
 
 function showLogin() {
-    loginSection.style.display = 'flex';
-    mainHeader.style.display = 'none';
-    mainContainer.style.display = 'none';
+    document.body.classList.remove('admin-authorized');
 }
 
 function showDashboard() {
-    loginSection.style.display = 'none';
-    mainHeader.style.display = 'flex';
-    mainContainer.style.display = 'flex';
+    document.body.classList.add('admin-authorized');
 }
 
 if (loginForm) {
