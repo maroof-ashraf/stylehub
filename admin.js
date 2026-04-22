@@ -1,17 +1,23 @@
-import { db, auth } from "./firebase-config.js";
+import { db, auth, googleProvider } from "./firebase-config.js";
 import { ref, onValue, set, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { onAuthStateChanged, signInWithEmailAndPassword, signInWithRedirect, getRedirectResult, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// DOM Elements
+// DOM Elements - Dashboard
 const adminProductList = document.getElementById('admin-product-list');
 const adminOrderList = document.getElementById('admin-order-list');
 const adminUserList = document.getElementById('admin-user-list');
 const addProductForm = document.getElementById('add-product-form');
-
-// Stats Elements
 const productsStat = document.getElementById('stat-products');
 const ordersStat = document.getElementById('stat-orders');
 const usersStat = document.getElementById('stat-users');
+
+// DOM Elements - Auth/UI
+const loginSection = document.getElementById('admin-login-section');
+const mainHeader = document.getElementById('main-admin-header');
+const mainContainer = document.getElementById('main-admin-container');
+const loginForm = document.getElementById('admin-login-form');
+const googleBtn = document.getElementById('google-login');
+const logoutBtn = document.getElementById('admin-logout');
 
 const defaultProducts = [
     { id: 1, name: "Classic White T-Shirt", price: 29.99, image: "images/tshirt.png", category: "men" },
@@ -22,13 +28,90 @@ const defaultProducts = [
     { id: 6, name: "Stylish Gold Sunglasses", price: 149.99, image: "images/sunglasses.png", category: "women" }
 ];
 
-// Initialize Realtime Listeners
+// --- AUTH LOGIC ---
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        await verifyAdmin(user);
+    } else {
+        showLogin();
+    }
+});
+
+// Check for redirect result on page load
+getRedirectResult(auth).then(async (result) => {
+    if (result) {
+        await verifyAdmin(result.user);
+    }
+}).catch(err => console.error("Redirect Error:", err));
+
+async function verifyAdmin(user) {
+    try {
+        const adminRef = ref(db, 'admins/' + user.uid);
+        const snapshot = await get(adminRef);
+        const isSuperAdmin = user.uid === 'mJrjXJbt2DfLzzKZt1clJYh12M92';
+
+        if (isSuperAdmin || (snapshot.exists() && snapshot.val() === true)) {
+            showDashboard();
+            initListeners();
+        } else {
+            alert("Access Denied: You do not have admin privileges.");
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            });
+        }
+    } catch (error) {
+        console.error("Verification error:", error);
+        showLogin();
+    }
+}
+
+function showLogin() {
+    loginSection.style.display = 'flex';
+    mainHeader.style.display = 'none';
+    mainContainer.style.display = 'none';
+}
+
+function showDashboard() {
+    loginSection.style.display = 'none';
+    mainHeader.style.display = 'flex';
+    mainContainer.style.display = 'flex';
+}
+
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            alert("Login Failed: " + error.message);
+        }
+    });
+}
+
+if (googleBtn) {
+    googleBtn.addEventListener('click', () => {
+        signInWithRedirect(auth, googleProvider);
+    });
+}
+
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => {
+            window.location.reload();
+        });
+    });
+}
+
+// --- DASHBOARD LOGIC ---
+
 function initListeners() {
-    // Listen for Products
     onValue(ref(db, 'products'), (snapshot) => {
         const data = snapshot.val();
         if (!data) {
-            // Seed if empty
             defaultProducts.forEach(p => push(ref(db, 'products'), p));
             return;
         }
@@ -37,7 +120,6 @@ function initListeners() {
         if (productsStat) productsStat.innerText = products.length;
     });
 
-    // Listen for Orders
     onValue(ref(db, 'orders'), (snapshot) => {
         const data = snapshot.val();
         const orders = data ? Object.entries(data).map(([id, val]) => ({ ...val, firebaseId: id })) : [];
@@ -45,7 +127,6 @@ function initListeners() {
         if (ordersStat) ordersStat.innerText = orders.length;
     });
 
-    // Listen for Users
     onValue(ref(db, 'users'), (snapshot) => {
         const data = snapshot.val();
         const users = data ? Object.entries(data).map(([id, val]) => ({ ...val, firebaseId: id })) : [];
@@ -54,7 +135,6 @@ function initListeners() {
     });
 }
 
-// Render Products
 function renderProductTable(products) {
     if (!adminProductList) return;
     adminProductList.innerHTML = '';
@@ -73,7 +153,6 @@ function renderProductTable(products) {
         adminProductList.appendChild(tr);
     });
 
-    // Add delete listeners
     document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.onclick = () => {
             const id = btn.getAttribute('data-id');
@@ -84,7 +163,6 @@ function renderProductTable(products) {
     });
 }
 
-// Add Product
 if (addProductForm) {
     addProductForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -92,15 +170,7 @@ if (addProductForm) {
         const price = parseFloat(document.getElementById('product-price').value);
         const image = document.getElementById('product-image').value;
         const category = document.getElementById('product-category').value;
-
-        const newProduct = {
-            id: Date.now(),
-            name,
-            price,
-            image,
-            category
-        };
-
+        const newProduct = { id: Date.now(), name, price, image, category };
         push(ref(db, 'products'), newProduct).then(() => {
             addProductForm.reset();
             alert('Product added successfully!');
@@ -108,7 +178,6 @@ if (addProductForm) {
     });
 }
 
-// Render Orders
 function renderOrderTable(orders) {
     if (!adminOrderList) return;
     adminOrderList.innerHTML = '';
@@ -128,7 +197,6 @@ function renderOrderTable(orders) {
     });
 }
 
-// Render Users
 function renderUserTable(users) {
     if (!adminUserList) return;
     adminUserList.innerHTML = '';
@@ -147,7 +215,6 @@ function renderUserTable(users) {
     });
 }
 
-// Tab Switching
 document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -158,24 +225,4 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         const targetView = document.getElementById(targetId);
         if (targetView) targetView.style.display = 'block';
     });
-});
-
-// Init
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        // Check if user is in the admins node
-        const adminRef = ref(db, 'admins/' + user.uid);
-        const snapshot = await get(adminRef);
-        
-        if (snapshot.exists() && snapshot.val() === true) {
-            console.log("Admin verified");
-            initListeners();
-        } else {
-            alert("Access Denied: You do not have admin privileges.");
-            window.location.href = "index.html";
-        }
-    } else {
-        alert("Please login as administrator.");
-        window.location.href = "admin-login.html";
-    }
 });

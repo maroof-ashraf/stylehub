@@ -6,16 +6,94 @@
     <title>Admin Panel | StyleHub</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="admin.css">
+    <style>
+        /* Shared Styles for Login Section */
+        #admin-login-section {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2000;
+        }
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .auth-header { text-align: center; margin-bottom: 2rem; }
+        .auth-header h1 { color: white; font-size: 2rem; margin-bottom: 0.5rem; }
+        .auth-header p { color: #94a3b8; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; color: #cbd5e1; margin-bottom: 0.5rem; font-size: 0.875rem; }
+        .form-group input { 
+            width: 100%; padding: 0.75rem 1rem; background: #0f172a; 
+            border: 1px solid #334155; border-radius: 0.75rem; color: white; 
+        }
+        .btn { width: 100%; padding: 0.875rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+        .primary-btn { background: #4f46e5; color: white; margin-top: 1rem; }
+        .btn-google { background: #1e293b; color: white; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1rem; }
+        .btn-google img { width: 20px; }
+        .divider { display: flex; align-items: center; margin: 1.5rem 0; color: #475569; }
+        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #334155; }
+        .divider span { padding: 0 10px; font-size: 0.875rem; }
+    </style>
 </head>
 <body>
-    <header class="admin-header">
+    <header class="admin-header" id="main-admin-header" style="display: none;">
         <div class="logo">StyleHub Admin</div>
         <nav>
             <a href="index.html">View Site</a>
+            <a href="#" id="admin-logout" style="margin-left: 20px; color: #ef4444; text-decoration: none; font-weight: 600;">Logout</a>
         </nav>
     </header>
 
-    <main class="admin-container">
+    <!-- Unified Login Section -->
+    <div id="admin-login-section" style="display: none;">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>Admin Access</h1>
+                <p>Authentication required for Dashboard</p>
+            </div>
+            
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label for="email">Admin Email</label>
+                    <input type="email" id="email" placeholder="admin@stylehub.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn primary-btn">Enter Dashboard</button>
+            </form>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <button id="google-login" class="btn btn-google">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Sign in with Google Admin
+            </button>
+
+            <div class="auth-footer" style="text-align: center; margin-top: 1.5rem;">
+                <a href="index.html" style="color: #94a3b8; text-decoration: none;">← Return to Storefront</a>
+            </div>
+        </div>
+    </div>
+
+    <main class="admin-container" id="main-admin-container" style="display: none;">
         <aside class="sidebar">
             <ul class="nav-links">
                 <li><a href="#" class="nav-btn" data-target="dashboard">Dashboard</a></li>
