@@ -18,6 +18,7 @@ const mainContainer = document.getElementById('main-admin-container');
 const loginForm = document.getElementById('admin-login-form');
 const googleBtn = document.getElementById('google-login');
 const logoutBtn = document.getElementById('admin-logout');
+const loadingOverlay = document.getElementById('admin-loading-overlay');
 
 const defaultProducts = [
     { id: 1, name: "Classic White T-Shirt", price: 29.99, image: "images/tshirt.png", category: "men" },
@@ -55,9 +56,10 @@ async function verifyAdmin(user) {
             showDashboard();
             initListeners();
         } else {
-            alert("Access Denied: You do not have admin privileges.");
+            // User is logged in but NOT an admin
             signOut(auth).then(() => {
-                window.location.href = "index.html";
+                alert("Access Denied: You do not have admin privileges. Please login with an admin account.");
+                showLogin();
             });
         }
     } catch (error) {
@@ -67,12 +69,14 @@ async function verifyAdmin(user) {
 }
 
 function showLogin() {
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
     loginSection.style.display = 'flex';
     mainHeader.style.display = 'none';
     mainContainer.style.display = 'none';
 }
 
 function showDashboard() {
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
     loginSection.style.display = 'none';
     mainHeader.style.display = 'flex';
     mainContainer.style.display = 'flex';
